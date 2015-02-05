@@ -1,0 +1,12 @@
+package org.jboss.ddoyle.rules;
+
+declare SimpleFact
+	id: String
+end
+
+rule "bla"
+when
+	SimpleFact(id=="1")
+then
+	System.out.println("Found simple fact with id  1");
+end
