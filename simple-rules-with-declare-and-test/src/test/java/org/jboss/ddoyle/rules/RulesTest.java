@@ -2,6 +2,8 @@ package org.jboss.ddoyle.rules;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Field;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kie.api.KieServices;
@@ -22,11 +24,12 @@ public class RulesTest {
 	
 	
 	@Test
-	public void test() {
+	public void test() throws Exception {
 		KieSession kieSession = kieContainer.newKieSession();
 		RulesFiredListener rulesFiredListener = new RulesFiredListener();
 		kieSession.addEventListener(rulesFiredListener);
 		
+		/*
 		FactType simpleFactType = kieSession.getKieBase().getFactType("org.jboss.ddoyle.rules", "SimpleFact");
 		Object simpleFact;
 		try {
@@ -37,11 +40,19 @@ public class RulesTest {
 			throw new RuntimeException(iae);
 		}
 		simpleFactType.set(simpleFact, "id", "1");
+		*/
+		Class simpleFactType = Class.forName("org.jboss.ddoyle.rules.SimpleFact");
+		Object simpleFact = simpleFactType.newInstance();
+		Field simpleFactTypeIdField = simpleFactType.getDeclaredField("id");
+		//Little bit of private field hacking.
+		simpleFactTypeIdField.setAccessible(true);
+		simpleFactTypeIdField.set(simpleFact, "1");
+		
 		
 		kieSession.insert(simpleFact);
 		kieSession.fireAllRules();
 		
-		assertEquals("One rule should have fired.", 1, 1); 
+		assertEquals("One rule should have fired.", 1, rulesFiredListener.getNrOfRulesFired()); 
 	}
 
 }
